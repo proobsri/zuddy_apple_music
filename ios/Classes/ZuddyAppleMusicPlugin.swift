@@ -178,34 +178,6 @@ public class ZuddyAppleMusicPlugin: NSObject, FlutterPlugin {
         result(nil)
       }
 
-    case "setPlaybackMuted":
-      guard let args = call.arguments as? [String: Any],
-            let muted = args["muted"] as? Bool else {
-        result(FlutterError(
-          code: "BAD_ARGS",
-          message: "Missing muted",
-          details: nil
-        ))
-        return
-      }
-
-      if #available(iOS 15.0, *) {
-        Task {
-          do {
-            ApplicationMusicPlayer.shared.state.volume = muted ? 0.0 : 1.0
-            result(nil)
-          } catch {
-            result(FlutterError(
-              code: "MUTE_ERROR",
-              message: error.localizedDescription,
-              details: nil
-            ))
-          }
-        }
-      } else {
-        result(nil)
-      }
-
     default:
       result(FlutterMethodNotImplemented)
     }

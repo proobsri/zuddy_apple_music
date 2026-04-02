@@ -38,8 +38,4 @@ class ZuddyAppleMusic {
   static Future<void> stopPlayback() async {
     await _channel.invokeMethod('stopPlayback');
   }
-
-  static Future<void> setPlaybackMuted(bool muted) async {
-    await _channel.invokeMethod('setPlaybackMuted', {'muted': muted});
-  }
 }
