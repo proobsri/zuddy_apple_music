@@ -65,11 +65,13 @@ public class ZuddyAppleMusicPlugin: NSObject, FlutterPlugin {
         return
       }
 
+      let limit = args["limit"] as? Int ?? 30
+
       if #available(iOS 15.0, *) {
         Task {
           do {
             var request = MusicCatalogSearchRequest(term: term, types: [Song.self])
-            request.limit = 20
+            request.limit = limit
             let response = try await request.response()
 
             let songs: [[String: Any]] = response.songs.map { song in
@@ -97,6 +99,83 @@ public class ZuddyAppleMusicPlugin: NSObject, FlutterPlugin {
         }
       } else {
         result([])
+      }
+
+    case "playSong":
+      guard let args = call.arguments as? [String: Any],
+            let songId = args["songId"] as? String else {
+        result(FlutterError(
+          code: "BAD_ARGS",
+          message: "Missing songId",
+          details: nil
+        ))
+        return
+      }
+
+      if #available(iOS 15.0, *) {
+        Task {
+          do {
+            let request = MusicCatalogResourceRequest<Song>(
+              matching: \.id,
+              equalTo: MusicItemID(songId)
+            )
+            let response = try await request.response()
+            guard let song = response.items.first else {
+              result("not_found")
+              return
+            }
+
+            let player = ApplicationMusicPlayer.shared
+            player.queue = [song]
+            try await player.play()
+
+            result("playing")
+          } catch {
+            result(FlutterError(
+              code: "PLAY_ERROR",
+              message: error.localizedDescription,
+              details: nil
+            ))
+          }
+        }
+      } else {
+        result("ios_version_not_supported")
+      }
+
+    case "pausePlayback":
+      if #available(iOS 15.0, *) {
+        Task {
+          do {
+            try await ApplicationMusicPlayer.shared.pause()
+            result(nil)
+          } catch {
+            result(FlutterError(
+              code: "PAUSE_ERROR",
+              message: error.localizedDescription,
+              details: nil
+            ))
+          }
+        }
+      } else {
+        result(nil)
+      }
+
+    case "stopPlayback":
+      if #available(iOS 15.0, *) {
+        Task {
+          do {
+            try await ApplicationMusicPlayer.shared.stop()
+            result(nil)
+          } catch {
+            result(FlutterError(
+              code: "STOP_ERROR",
+              message: error.localizedDescription,
+              details: nil
+            ))
+          }
+        }
+      } else {
+        result(nil)
       }
 
     default:

@@ -13,10 +13,29 @@ class ZuddyAppleMusic {
     return result ?? false;
   }
 
-  static Future<List<dynamic>> searchSongs(String term) async {
+  static Future<List<dynamic>> searchSongs(
+    String term, {
+    int limit = 30,
+  }) async {
     final result = await _channel.invokeMethod<List<dynamic>>('searchSongs', {
       'term': term,
+      'limit': limit,
     });
     return result ?? [];
+  }
+
+  static Future<String> playSong(String songId) async {
+    final result = await _channel.invokeMethod<String>('playSong', {
+      'songId': songId,
+    });
+    return result ?? 'failed';
+  }
+
+  static Future<void> pausePlayback() async {
+    await _channel.invokeMethod('pausePlayback');
+  }
+
+  static Future<void> stopPlayback() async {
+    await _channel.invokeMethod('stopPlayback');
   }
 }
