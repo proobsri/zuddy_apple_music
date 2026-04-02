@@ -12,4 +12,11 @@ class ZuddyAppleMusic {
     final result = await _channel.invokeMethod<bool>('canPlayCatalogContent');
     return result ?? false;
   }
+
+  static Future<List<dynamic>> searchSongs(String term) async {
+    final result = await _channel.invokeMethod<List<dynamic>>('searchSongs', {
+      'term': term,
+    });
+    return result ?? [];
+  }
 }
